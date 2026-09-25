@@ -2,12 +2,25 @@
   "name": "Email Translation to Slack (local)",
   "nodes": [
     {
-      "parameters": { "options": { "trackLastMessageId": false } },
+      "parameters": {
+        "options": {
+          "trackLastMessageId": false
+        }
+      },
       "name": "Email Trigger (IMAP)",
       "type": "n8n-nodes-base.emailReadImap",
       "typeVersion": 2.2,
-      "position": [0, 0],
-      "credentials": { "imap": { "id": "PuKFQ3shgwTVFnqB", "name": "IMAP account" } }
+      "position": [
+        96,
+        -112
+      ],
+      "id": "5b99aaf1-f50a-4367-9936-3c693a197cd1",
+      "credentials": {
+        "imap": {
+          "id": "PuKFQ3shgwTVFnqB",
+          "name": "IMAP account"
+        }
+      }
     },
     {
       "parameters": {
@@ -20,42 +33,110 @@
       "name": "Translate to English",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [240, 0]
+      "position": [
+        336,
+        -112
+      ],
+      "id": "984ffd35-d1c6-4589-9fdf-56d9d250ccee"
     },
     {
       "parameters": {
         "model": "qwen2.5-coder:14b",
-        "options": { "temperature": 0.2 }
+        "options": {
+          "temperature": 0.2
+        }
       },
       "name": "Ollama Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
       "typeVersion": 1,
-      "position": [240, 240]
+      "position": [
+        336,
+        128
+      ],
+      "id": "8adb79d0-761f-4190-9cb0-288558222538",
+      "credentials": {
+        "ollamaApi": {
+          "id": "A43BD7TdBy1bk990",
+          "name": "Ollama account"
+        }
+      }
     },
     {
       "parameters": {
         "select": "user",
-        "user": { "__rl": true, "value": "U0C42RXFWFP", "mode": "id" },
+        "user": {
+          "__rl": true,
+          "value": "U0C42RXFWFP",
+          "mode": "id"
+        },
         "text": "=*Translated email {{ $now.toFormat(\"dd/MM/yyyy HH:mm\") }}*\nFrom: {{ $(\"Email Trigger (IMAP)\").item.json.from }}\nSubject: {{ $(\"Email Trigger (IMAP)\").item.json.subject }}\n\n{{ $json.output }}",
         "otherOptions": {}
       },
       "name": "Send Translation to Slack",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.7,
-      "position": [560, 0],
-      "credentials": { "slackApi": { "id": "UFwAOJnqxEuAbWKt", "name": "Slack account" } }
+      "position": [
+        656,
+        -112
+      ],
+      "id": "f84f5821-f149-47f6-927e-71ed09ee9721",
+      "webhookId": "5b237de0-e470-4bd7-9ead-247fa5b17151",
+      "credentials": {
+        "slackApi": {
+          "id": "UFwAOJnqxEuAbWKt",
+          "name": "Slack account"
+        }
+      }
     }
   ],
+  "pinData": {},
   "connections": {
     "Email Trigger (IMAP)": {
-      "main": [[{ "node": "Translate to English", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Translate to English",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Ollama Chat Model": {
-      "ai_languageModel": [[{ "node": "Translate to English", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "Translate to English",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Translate to English": {
-      "main": [[{ "node": "Send Translation to Slack", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Send Translation to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" }
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "da189506-040f-48ab-904b-a0de9885c578",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f1c41eb9e650cfa328ae3064108fb10ece705bcfcb843841b82f1bcf90d7126e"
+  },
+  "nodeGroups": [],
+  "id": "w4A7yNg2E8nAOFeO",
+  "tags": []
 }
