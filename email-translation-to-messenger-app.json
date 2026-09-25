@@ -1,5 +1,5 @@
 {
-  "name": "Email Translation to Slack (local)",
+  "name": "Email Translation to Messenger Apps",
   "nodes": [
     {
       "parameters": {
@@ -76,8 +76,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.7,
       "position": [
-        656,
-        -112
+        672,
+        16
       ],
       "id": "f84f5821-f149-47f6-927e-71ed09ee9721",
       "webhookId": "5b237de0-e470-4bd7-9ead-247fa5b17151",
@@ -85,6 +85,51 @@
         "slackApi": {
           "id": "UFwAOJnqxEuAbWKt",
           "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1550261781",
+        "text": "=*Translated email {{ $now.toFormat(\"dd/MM/yyyy HH:mm\") }}* From: {{ $(\"Email Trigger (IMAP)\").item.json.from }} Subject: {{ $(\"Email Trigger (IMAP)\").item.json.subject }}  {{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -240
+      ],
+      "id": "5f744679-b8bc-4b2c-af27-4b750174b413",
+      "name": "Send Translatiom to Telegram",
+      "webhookId": "6c40cc93-ab12-4987-a3ce-2d488c132117",
+      "credentials": {
+        "telegramApi": {
+          "id": "EeUgQwGnBEpZu2Dd",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendSticker",
+        "chatId": "1550261781",
+        "file": "CAACAgIAAxkBAAMEarakcMy5VWAwRObftIsXvg8-DQ8AAngAAw220hnLp4dlQGFguD0E",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        -240
+      ],
+      "id": "edd225d0-564a-4aa9-98a6-7c982c31371a",
+      "name": "Send a sticker",
+      "webhookId": "73342949-f370-46b5-b25d-f221ad47494c",
+      "credentials": {
+        "telegramApi": {
+          "id": "EeUgQwGnBEpZu2Dd",
+          "name": "Telegram account"
         }
       }
     }
@@ -120,6 +165,22 @@
             "node": "Send Translation to Slack",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Send Translatiom to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Translatiom to Telegram": {
+      "main": [
+        [
+          {
+            "node": "Send a sticker",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -131,7 +192,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "da189506-040f-48ab-904b-a0de9885c578",
+  "versionId": "d4f2fdce-19b1-4b37-99a3-55c880cc09ca",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f1c41eb9e650cfa328ae3064108fb10ece705bcfcb843841b82f1bcf90d7126e"
