@@ -1,6 +1,6 @@
 # n8n sample workflow with local agents
 
-This is a sample n8n workflow with nodes linked to local AI models served through Ollama.
+This is a sample n8n workflow with AI nodes linked to local AI models served through Ollama. It's implemented on a self-hosted instance of n8n.
 
 ![Schema](n8n-graph-nodes.png)
 
