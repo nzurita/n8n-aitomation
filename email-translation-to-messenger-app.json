@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.emailReadImap",
       "typeVersion": 2.2,
       "position": [
-        96,
+        -240,
         -112
       ],
       "id": "5b99aaf1-f50a-4367-9936-3c693a197cd1",
@@ -24,60 +24,21 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "=Translate the following email to English. Return only the translated subject and body, no commentary. Skip headers, signature and legal text.\n\nSubject: {{ $json.subject }}\n\nBody:\n{{ $json.textPlain || $json.textHtml }}",
-        "options": {
-          "systemMessage": "You are a professional translator. Translate the user-provided email content into fluent, natural English. If the text is already in English, return it unchanged. Output only the translated text with no extra explanation."
-        }
-      },
-      "name": "Translate to English",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        336,
-        -112
-      ],
-      "id": "984ffd35-d1c6-4589-9fdf-56d9d250ccee"
-    },
-    {
-      "parameters": {
-        "model": "qwen2.5-coder:14b",
-        "options": {
-          "temperature": 0.2
-        }
-      },
-      "name": "Ollama Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
-      "position": [
-        336,
-        128
-      ],
-      "id": "8adb79d0-761f-4190-9cb0-288558222538",
-      "credentials": {
-        "ollamaApi": {
-          "id": "A43BD7TdBy1bk990",
-          "name": "Ollama account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "select": "user",
         "user": {
           "__rl": true,
           "value": "U0C42RXFWFP",
           "mode": "id"
         },
-        "text": "=*Translated email {{ $now.toFormat(\"dd/MM/yyyy HH:mm\") }}*\nFrom: {{ $(\"Email Trigger (IMAP)\").item.json.from }}\nSubject: {{ $(\"Email Trigger (IMAP)\").item.json.subject }}\n\n{{ $json.output }}",
+        "text": "==*Translated email {{ $now.toFormat(\"dd/MM/yyyy HH:mm\") }}*\nFrom: {{ $json.from }}\n\n{{ $json.message }}",
         "otherOptions": {}
       },
       "name": "Send Translation to Slack",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.7,
       "position": [
-        672,
-        16
+        992,
+        0
       ],
       "id": "f84f5821-f149-47f6-927e-71ed09ee9721",
       "webhookId": "5b237de0-e470-4bd7-9ead-247fa5b17151",
@@ -91,13 +52,13 @@
     {
       "parameters": {
         "chatId": "1550261781",
-        "text": "=*Translated email {{ $now.toFormat(\"dd/MM/yyyy HH:mm\") }}* From: {{ $(\"Email Trigger (IMAP)\").item.json.from }} Subject: {{ $(\"Email Trigger (IMAP)\").item.json.subject }}  {{ $json.output }}",
+        "text": "==*Translated email {{ $now.toFormat(\"dd/MM/yyyy HH:mm\") }}*\nFrom: {{ $json.from }}\n\n{{ $json.message }}",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        672,
+        992,
         -240
       ],
       "id": "5f744679-b8bc-4b2c-af27-4b750174b413",
@@ -120,7 +81,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        896,
+        1200,
         -240
       ],
       "id": "edd225d0-564a-4aa9-98a6-7c982c31371a",
@@ -132,6 +93,112 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.textPlain || $json.textHtml || '' }}",
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"has_quoted_content\":{\"type\":\"boolean\",\"description\":\"true if the email contains a previous forwarded or replied message below the main body\"},\"quoted_start\":{\"type\":\"string\",\"description\":\"Exact first line where the forwarded or replied content begins, copied verbatim from the input (for example '-----Original Message-----', 'El lun, 3 mar de 2025, Ana escribió:', 'On Mon, Mar 3, 2025, Ana wrote:', 'De: Ana'). Empty string if none.\"},\"has_signature\":{\"type\":\"boolean\",\"description\":\"true if there is a sender signature block or a legal/confidentiality disclaimer\"},\"signature_start\":{\"type\":\"string\",\"description\":\"Exact first line where the signature block or legal disclaimer begins, copied verbatim from the input. Empty string if none.\"}},\"required\":[\"has_quoted_content\",\"quoted_start\",\"has_signature\",\"signature_start\"]}",
+        "options": {
+          "systemPromptTemplate": "You analyse the raw text of one email. Your only task is to locate where the main message written by the sender ends.\n\nReport:\n- the exact first line where a quoted, forwarded or replied previous message begins (headers like 'De:', 'From:', '-----Original Message-----', 'El ... escribió:', 'On ... wrote:', or lines starting with '>')\n- the exact first line where the sender's signature block or a legal/confidentiality disclaimer begins\n\nCopy those lines character by character from the input. Never paraphrase, translate, trim or summarise them. If something does not exist, return false and an empty string. Do not extract anything else."
+        }
+      },
+      "name": "Detect body end",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -112
+      ],
+      "id": "7f87a16a-117d-435f-95e1-8f18eb3b202f"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5-coder:14b",
+        "options": {
+          "temperature": 0,
+          "format": "json"
+        }
+      },
+      "name": "Ollama JSON",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        96
+      ],
+      "id": "3e4db25b-4227-4faf-909e-fb6d90616106",
+      "credentials": {
+        "ollamaApi": {
+          "id": "A43BD7TdBy1bk990",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const trigger = $('Email Trigger (IMAP)').item.json;\nconst raw = (trigger.textPlain || trigger.textHtml || '').replace(/\\r\\n/g, '\\n');\nconst ai = $json.output || {};\n\nconst norm = s => (s || '').replace(/\\s+/g, ' ').trim();\n\n// Locate the line reported by the model: exact match, then whitespace-insensitive, then by prefix.\nfunction findMarker(text, marker) {\n  const m = (marker || '').trim();\n  if (m.length < 4) return -1;\n  const exact = text.indexOf(m);\n  if (exact > -1) return exact;\n  const target = norm(m);\n  const prefix = target.slice(0, 30);\n  let pos = 0;\n  for (const line of text.split('\\n')) {\n    const nl = norm(line);\n    if (nl && (nl === target || nl.startsWith(prefix))) return pos;\n    pos += line.length + 1;\n  }\n  return -1;\n}\n\n// Deterministic safety net for when the model misses a marker.\nconst quotedPatterns = [\n  /^-{2,}\\s*(Original Message|Mensaje original|Forwarded message|Mensaje reenviado)\\s*-{2,}\\s*$/im,\n  /^(El|On) .{5,150}(escribi[oó]|wrote):\\s*$/im,\n  /^(De|From):\\s.+\\n(Enviado|Sent|Para|To|Fecha|Date):/im,\n  /^>\\s?\\S/m,\n];\nconst signaturePatterns = [\n  /^-- ?$/m,\n  /^(Saludos|Un saludo|Atentamente|Cordialmente|Gracias|Best regards|Kind regards|Regards|Cheers|Thanks),?\\s*$/im,\n  /AVISO (DE )?(LEGAL|CONFIDENCIALIDAD)|CONFIDENTIALITY NOTICE|DISCLAIMER/i,\n  /Este (mensaje|correo)[^\\n]{0,60}(anexos|adjuntos|ficheros|confidencial)/i,\n  /This (e-?mail|message)[^\\n]{0,80}(confidential|intended)/i,\n];\n\nfunction firstMatch(text, patterns) {\n  let best = -1;\n  for (const re of patterns) {\n    const m = re.exec(text);\n    if (m && (best === -1 || m.index < best)) best = m.index;\n  }\n  return best;\n}\n\nlet quotedIdx = ai.has_quoted_content ? findMarker(raw, ai.quoted_start) : -1;\nif (quotedIdx === -1) quotedIdx = firstMatch(raw, quotedPatterns);\n\nlet signatureIdx = ai.has_signature ? findMarker(raw, ai.signature_start) : -1;\nif (signatureIdx === -1) signatureIdx = firstMatch(raw, signaturePatterns);\n\n// A marker within the first few characters is a false positive, never cut there.\nconst MIN_BODY = 20;\nconst cuts = [quotedIdx, signatureIdx].filter(i => i >= MIN_BODY);\nconst cutAt = cuts.length ? Math.min(...cuts) : -1;\nconst cleanBody = (cutAt > -1 ? raw.slice(0, cutAt) : raw).trim();\n\nconst strippedQuoted = quotedIdx >= MIN_BODY;\nconst strippedSignature = signatureIdx >= MIN_BODY;\n\nconst notes = [];\nif (strippedQuoted) notes.push('This was a forward or reply and some extra text was stripped out.');\nif (strippedSignature) notes.push('This email had a signature or legal notice on it.');\n\nreturn {\n  json: {\n    from: trigger.from,\n    subject: trigger.subject,\n    date: trigger.date,\n    clean_body: cleanBody,\n    stripped_quoted: strippedQuoted,\n    stripped_signature: strippedSignature,\n    notes,\n    debug: { cutAt, quotedIdx, signatureIdx, originalLength: raw.length, ai },\n  },\n};"
+      },
+      "name": "Strip body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "852f71e6-544a-4520-83a4-cd9b4a89840a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Translate the following email into English. Preserve line breaks and paragraphs. Output only the translation in this exact layout, with no commentary:\n\nSubject: <translated subject>\n\n<translated body>\n\nIf the text is already in English, return it unchanged in that layout.\n\nSubject: {{ $json.subject }}\n\nBody:\n{{ $json.clean_body }}",
+        "batching": {}
+      },
+      "name": "Translate",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        400,
+        -112
+      ],
+      "id": "0bb9c752-f24c-4671-9daf-348c602a7d96"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5-coder:14b",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "name": "Ollama Translate",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        400,
+        80
+      ],
+      "id": "062b3a7d-5b06-4faa-a277-bc6b4bc25ad2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "A43BD7TdBy1bk990",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const strip = $('Strip body').item.json;\nconst translated = String($json.text ?? $json.output ?? '').trim();\nconst footer = strip.notes.length\n  ? '\\n\\n' + strip.notes.map(n => '- ' + n).join('\\n')\n  : '';\n\nreturn {\n  json: {\n    from: strip.from,\n    subject: strip.subject,\n    date: strip.date,\n    translated,\n    notes: strip.notes,\n    message: translated + footer,\n  },\n};"
+      },
+      "name": "Compose message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        -112
+      ],
+      "id": "bf0c2083-56ef-497f-a0be-9b8eeab4e333"
     }
   ],
   "pinData": {},
@@ -140,34 +207,7 @@
       "main": [
         [
           {
-            "node": "Translate to English",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Ollama Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Translate to English",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Translate to English": {
-      "main": [
-        [
-          {
-            "node": "Send Translation to Slack",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Send Translatiom to Telegram",
+            "node": "Detect body end",
             "type": "main",
             "index": 0
           }
@@ -184,6 +224,77 @@
           }
         ]
       ]
+    },
+    "Detect body end": {
+      "main": [
+        [
+          {
+            "node": "Strip body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama JSON": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Detect body end",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Strip body": {
+      "main": [
+        [
+          {
+            "node": "Translate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Translate": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Translate",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate": {
+      "main": [
+        [
+          {
+            "node": "Compose message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose message": {
+      "main": [
+        [
+          {
+            "node": "Send Translatiom to Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Translation to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -192,7 +303,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "d4f2fdce-19b1-4b37-99a3-55c880cc09ca",
+  "versionId": "a8dc9140-1a0d-4dbe-9a1d-93a99f59803a",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f1c41eb9e650cfa328ae3064108fb10ece705bcfcb843841b82f1bcf90d7126e"
