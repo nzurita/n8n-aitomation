@@ -75,13 +75,13 @@
       "parameters": {
         "operation": "sendSticker",
         "chatId": "1550261781",
-        "file": "CAACAgIAAxkBAAMEarakcMy5VWAwRObftIsXvg8-DQ8AAngAAw220hnLp4dlQGFguD0E",
+        "file": "={{ $('Pick random sticker').item.json.sticker_id }}",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1200,
+        1424,
         -240
       ],
       "id": "edd225d0-564a-4aa9-98a6-7c982c31371a",
@@ -189,7 +189,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const strip = $('Strip body').item.json;\nconst translated = String($json.text ?? $json.output ?? '').trim();\nconst footer = strip.notes.length\n  ? '\\n\\n' + strip.notes.map(n => '- ' + n).join('\\n')\n  : '';\n\nreturn {\n  json: {\n    from: strip.from,\n    subject: strip.subject,\n    date: strip.date,\n    translated,\n    notes: strip.notes,\n    message: translated + footer,\n  },\n};"
+        "jsCode": "const strip = $('Strip body').item.json;\nconst translated = String($json.text ?? $json.output ?? '').trim();\nconst footer = (wrap) => strip.notes.length\n  ? '\\n\\n' + strip.notes.map(wrap).join('\\n')\n  : '';\n\nreturn {\n  json: {\n    from: strip.from,\n    subject: strip.subject,\n    date: strip.date,\n    translated,\n    notes: strip.notes,\n    message: translated + footer(n => `_${n}_`),\n  },\n};"
       },
       "name": "Compose message",
       "type": "n8n-nodes-base.code",
@@ -199,6 +199,19 @@
         -112
       ],
       "id": "bf0c2083-56ef-497f-a0be-9b8eeab4e333"
+    },
+    {
+      "parameters": {
+        "jsCode": "const STICKERS = [\n// Frankesteinjunior (Frankestein) - 6 stickers\n  'CAACAgQAAxUAAWq2pbGE3uPMDEomTwABwIX3tLxifwACxAAD0CgECgdSEzk4LX66PQQ',\n  'CAACAgQAAxUAAWq2pbFNn73F_lr8N8aR9nBjK0FgAALGAAPQKAQKfYXT0L0suS09BA',\n  'CAACAgQAAxUAAWq2pbF71v1-lAaJzsh3XFasRuNTAALIAAPQKAQKVtGOScezi7I9BA',\n  'CAACAgQAAxUAAWq2pbE3OhydiakejYIWSNg0-AjnAALKAAPQKAQKDf6a3s9vrA09BA',\n  'CAACAgQAAxUAAWq2pbGse6EWomI77lfsN-LLo6gYAALMAAPQKAQKdq2ChXZEZnM9BA',\n  'CAACAgQAAxUAAWq2pbHfrBPKDCeL7SALnTpJOzKcAALOAAPQKAQKDGMjqLSQ_Ko9BA',\n// Harry Gorilla (HarryGorilla) - 27 stickers\n  'CAACAgIAAxUAAWq7kGjsgTuLqoNUOc3Xk6-OY1PpAAIPAwACbbBCAw60TGS7nV1GPQQ',\n  'CAACAgIAAxUAAWq7kGgtozluyL8jqxHQd1kQS-yIAAIcAwACbbBCAxnyJJG8xexAPQQ',\n  'CAACAgIAAxUAAWq7kGgInHiVITrNsv7ojesOhC_RAAIeAwACbbBCA6gI8-jQjopoPQQ',\n  'CAACAgIAAxUAAWq7kGgh34KdNBKlIZENBzBm80ryAAIWAwACbbBCA68qA0qDE3KBPQQ',\n  'CAACAgIAAxUAAWq7kGie8oUXBsi-JcdchceN8FlyAAL_AgACbbBCAwSgOas0AjY3PQQ',\n  'CAACAgIAAxUAAWq7kGhs-2k8GSKu-NnFH4jOyVWkAAIOAwACbbBCAxdaoJVV2gKmPQQ',\n  'CAACAgIAAxUAAWq7kGijFqE2FcKKab8HZK9lezOVAAIMAwACbbBCA1R-zEHxl4T7PQQ',\n  'CAACAgIAAxUAAWq7kGiGnOSLy8Br_qO0yBrMWWBVAAILAwACbbBCA3-0HNrMpkQlPQQ',\n  'CAACAgIAAxUAAWq7kGiZND60bWNUQopQt4aah3avAAIRAwACbbBCA9fbtKqOVG0_PQQ',\n  'CAACAgIAAxUAAWq7kGj8KwoC5cKGzw3OoHd9c39iAAIHAwACbbBCA4fZTF5cPPewPQQ',\n  'CAACAgIAAxUAAWq7kGg484crVtiIG-WATSPHG64-AAIJAwACbbBCA6-5xc2si2vxPQQ',\n  'CAACAgIAAxUAAWq7kGimL-N8SHb8dJHmUyXuZX4bAAIQAwACbbBCA5LjWeHzUrZpPQQ',\n  'CAACAgIAAxUAAWq7kGhs9dy8KiNNFcSXklIZOdprAAIIAwACbbBCAy85g9U-VlLpPQQ',\n  'CAACAgIAAxUAAWq7kGjRYFw1eE-DRv_7cVakylhDAAITAwACbbBCAysY0zvleHB8PQQ',\n  'CAACAgIAAxUAAWq7kGgIihhzIo8RGgABubF4uqxvmQACFQMAAm2wQgPXrgwxHVqBbj0E',\n  'CAACAgIAAxUAAWq7kGhtypl8lM2kI_BlFRPyTi1oAAISAwACbbBCA1XHnstdZKMrPQQ',\n  'CAACAgIAAxUAAWq7kGjakoHWyCXQfFpd4eI-ZI1cAAIZAwACbbBCA81xBJbD-GClPQQ',\n  'CAACAgIAAxUAAWq7kGitwOdR8YdGdINgeX9-OiVeAAIUAwACbbBCA3q2hKhRxek2PQQ',\n  'CAACAgIAAxUAAWq7kGh8dVTxZTJF7w60M64wr5gyAAIbAwACbbBCAx-vcfH7DgxKPQQ',\n  'CAACAgIAAxUAAWq7kGgUCkVmYdojiqRt2MfIn_zoAAIdAwACbbBCA6CUGGCXjkJ9PQQ',\n  'CAACAgIAAxUAAWq7kGj2avpBm2YhrLsYpU7C1V4QAAIaAwACbbBCA8_rKoki93qhPQQ',\n  'CAACAgIAAxkBAAMJaruPQXfyyDwaSM-wZU9MCPdAXwsAAh8DAAJtsEIDIVN0PcqV3xU9BA',\n  'CAACAgIAAxUAAWq7kGiVKIpM3Uw5NuKBbtfm-XgkAAIjAwACbbBCA1RIwK3ABrkGPQQ',\n  'CAACAgIAAxUAAWq7kGicvjjI6DYrgWbFKHstTNt8AAIhAwACbbBCA5aSPNnLF2W1PQQ',\n  'CAACAgIAAxUAAWq7kGgfEKJE82Iw5Xi11jsiMvchAAIiAwACbbBCA7zHw9-hcLV4PQQ',\n  'CAACAgIAAxUAAWq7kGiGhT-f9cs23LqrWpLYjLEFAAIhRgACqxpQSSJTZfB0fffNPQQ',\n  'CAACAgIAAxUAAWq7kGg559QYBmlm42yT6242rDJZAAIvWwACuTkwSFDY3k6_0vnAPQQ',\n];\n\nconst pick = STICKERS[Math.floor(Math.random() * STICKERS.length)];\n\nreturn { json: { ...$json, sticker_id: pick } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        -240
+      ],
+      "id": "9888a1bf-9887-4311-9c94-70815a258a97",
+      "name": "Pick random sticker"
     }
   ],
   "pinData": {},
@@ -218,7 +231,7 @@
       "main": [
         [
           {
-            "node": "Send a sticker",
+            "node": "Pick random sticker",
             "type": "main",
             "index": 0
           }
@@ -295,6 +308,17 @@
           }
         ]
       ]
+    },
+    "Pick random sticker": {
+      "main": [
+        [
+          {
+            "node": "Send a sticker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -303,7 +327,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "a8dc9140-1a0d-4dbe-9a1d-93a99f59803a",
+  "versionId": "33df7cac-52d2-4c41-84b3-59334ec6a196",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f1c41eb9e650cfa328ae3064108fb10ece705bcfcb843841b82f1bcf90d7126e"
